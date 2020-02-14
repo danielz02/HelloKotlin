@@ -4,7 +4,7 @@ fun main() {
 }
 
 fun add(first: Int, second: Int): Int {
-    require(first >= 0) {"first should be positive!"}
+    require(first >= 0) { "first should be positive!" }
     return first + second
 }
 
