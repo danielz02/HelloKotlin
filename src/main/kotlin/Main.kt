@@ -1,13 +1,32 @@
-fun main() {
-    println("Hello, World!")
-    println(add(1, 2))
-}
+import io.ktor.application.call
+import io.ktor.http.HttpStatusCode
+import io.ktor.response.respond
+import io.ktor.response.respondText
+import io.ktor.routing.get
+import io.ktor.routing.routing
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 
-fun add(first: Int, second: Int): Int {
-    require(first >= 0) { "first should be positive!" }
-    return first + second
+fun main() {
+	embeddedServer(Netty, 8080) {
+		routing {
+			get("/") {
+				call.respondText(hello())
+			}
+			get("/add/{first}/{second}") {
+				try {
+					val first = call.parameters["first"]!!.toInt()
+					val second = call.parameters["second"]!!.toInt()
+					call.respondText((first + second).toString())
+				} catch (e: Exception) {
+					call.respond(HttpStatusCode.BadRequest)
+				}
+
+			}
+		}
+	}.start(wait = true)
 }
 
 fun hello(): String {
-    return "Hello, World!"
+	return "Hello!"
 }
