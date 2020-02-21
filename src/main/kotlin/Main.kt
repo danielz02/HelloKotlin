@@ -14,6 +14,7 @@ import io.ktor.server.netty.Netty
 data class AddResult(val first: Int, val second: Int, val result: String)
 
 fun Application.adder() {
+    val count = mutableMapOf<Int, Int>()
     install(ContentNegotiation) {
         gson { }
     }
@@ -28,8 +29,14 @@ fun Application.adder() {
                 val addResult = AddResult(first, second, (first + second).toString())
                 call.respond(addResult)
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.NotFound)
+                call.respond(HttpStatusCode.InternalServerError)
             }
+        }
+        get("/count/{first}") {
+            val first = call.parameters["first"]!!.toInt()
+            val firstCount = count.getOrDefault(first, 0) + 1
+            count[first] = firstCount
+            call.respondText(firstCount.toString())
         }
     }
 }
