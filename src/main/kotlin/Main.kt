@@ -4,14 +4,17 @@ import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.gson
 import io.ktor.http.HttpStatusCode
+import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.get
+import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 
-data class AddResult(val first: Int, val second: Int, val result: String)
+data class OperationResult(val operation: String, val first: Int, val second: Int, val result: Int)
+data class CalculatorRequest(val operation: String, val first: Int, val second: Int)
 
 fun Application.adder() {
     val count = mutableMapOf<Int, Int>()
@@ -22,14 +25,22 @@ fun Application.adder() {
         get("/") {
             call.respondText(hello())
         }
-        get("/add/{first}/{second}") {
+        get("/{operation}/{first}/{second}") {
             try {
+                val operation = call.parameters["operation"]!!
                 val first = call.parameters["first"]!!.toInt()
                 val second = call.parameters["second"]!!.toInt()
-                val addResult = AddResult(first, second, (first + second).toString())
-                call.respond(addResult)
+                val result = when (operation) {
+                    "add" -> first + second
+                    "subtract" -> first - second
+                    "multiply" -> first * second
+                    "divide" -> first / second
+                    else -> throw Exception("$operation is not supported!")
+                }
+                val operationResult = OperationResult(operation, first, second, result)
+                call.respond(operationResult)
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.InternalServerError)
+                call.respond(HttpStatusCode.InternalServerError, e)
             }
         }
         get("/count/{first}") {
@@ -37,6 +48,23 @@ fun Application.adder() {
             val firstCount = count.getOrDefault(first, 0) + 1
             count[first] = firstCount
             call.respondText(firstCount.toString())
+        }
+        post("/calculate") {
+            try {
+                val request = call.receive<CalculatorRequest>()
+                val result = when (request.operation) {
+                    "add" -> request.first + request.second
+                    "subtract" -> request.first - request.second
+                    "multiply" -> request.first * request.second
+                    "divide" -> request.first / request.second
+                    else -> throw Exception("operation is not supported!")
+                }
+                val calculateResult = OperationResult(request.operation, request.first, request.second, result)
+                call.respond(calculateResult)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest)
+            }
+
         }
     }
 }
