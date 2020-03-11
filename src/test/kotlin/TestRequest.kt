@@ -1,5 +1,6 @@
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
+import webAPI.CalculatorRequest
 
 class TestRequest : StringSpec({
     "should add properly" {

@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "1.3.60"
     application
     id("org.jlleitschuh.gradle.ktlint") version "9.2.1"
+    id("com.github.johnrengelman.shadow")  version "5.2.0"
 }
 
 group = "edu.illinois.web.danielz01"
@@ -37,4 +38,11 @@ application {
 }
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+val mainClass = "webAPI.MainKT"
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = mainClass
+    }
 }

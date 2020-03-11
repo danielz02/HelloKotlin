@@ -1,3 +1,4 @@
+package webAPI
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -16,7 +17,7 @@ import io.ktor.server.netty.Netty
 data class OperationResult(val operation: String, val first: Int, val second: Int, val result: Int)
 data class CalculatorRequest(val operation: String, val first: Int, val second: Int) {
     fun compute(): OperationResult {
-        val mathResult = when(operation) {
+        val mathResult = when (operation) {
             "add" -> first + second
             "subtract" -> first - second
             "multiply" -> first * second
@@ -60,7 +61,6 @@ fun Application.adder() {
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
             }
-
         }
     }
 }
