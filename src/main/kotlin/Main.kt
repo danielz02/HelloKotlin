@@ -15,14 +15,16 @@ import io.ktor.server.netty.Netty
 
 data class OperationResult(val operation: String, val first: Int, val second: Int, val result: Int)
 data class CalculatorRequest(val operation: String, val first: Int, val second: Int) {
-    private val result = when(operation) {
-        "add" -> first + second
-        "subtract" -> first - second
-        "multiply" -> first * second
-        "divide" -> first / second
-        else -> throw Exception("$operation is not supported!")
+    fun compute(): OperationResult {
+        val mathResult = when(operation) {
+            "add" -> first + second
+            "subtract" -> first - second
+            "multiply" -> first * second
+            "divide" -> first / second
+            else -> throw Exception("$operation is not supported!")
+        }
+        return OperationResult(operation, first, second, mathResult)
     }
-    val operationResult = OperationResult(operation, first, second, result)
 }
 
 fun Application.adder() {
@@ -40,7 +42,7 @@ fun Application.adder() {
                 val first = call.parameters["first"]!!.toInt()
                 val second = call.parameters["second"]!!.toInt()
                 val calculatorRequest = CalculatorRequest(operation, first, second)
-                call.respond(calculatorRequest.operationResult)
+                call.respond(calculatorRequest.compute())
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.InternalServerError, e)
             }
@@ -54,7 +56,7 @@ fun Application.adder() {
         post("/calculate") {
             try {
                 val request = call.receive<CalculatorRequest>()
-                call.respond(request.operationResult)
+                call.respond(request.compute())
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest)
             }
@@ -67,5 +69,5 @@ fun main() {
 }
 
 fun hello(): String {
-    return "Hello!"
+    return "Hello, World"
 }
